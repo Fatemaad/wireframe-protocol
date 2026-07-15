@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Anthropic-style AI mark, white, transparent background -->
+  <g fill="#ffffff">
+    <!-- Bold A (no crossbar): filled chevron -->
+    <path d="M31 74 L44 26 L52 26 L39 74 Z"/>
+    <path d="M52 26 L60 26 L47 74 L39 74 Z" opacity="0"/>
+    <!-- Slanted bar (the 'I') -->
+    <rect x="58" y="26" width="9" height="48" rx="1"/>
+  </g>
+</svg>

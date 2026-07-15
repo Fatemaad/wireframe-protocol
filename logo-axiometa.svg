@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- AxioMeta MX mark, white, transparent background -->
+  <g stroke="#ffffff" stroke-width="8" stroke-linecap="square" stroke-linejoin="miter" fill="none">
+    <!-- left vertical -->
+    <line x1="26" y1="30" x2="26" y2="58"/>
+    <!-- right vertical -->
+    <line x1="74" y1="30" x2="74" y2="58"/>
+    <!-- diagonal from left-top down to bottom-right (forms M + X) -->
+    <line x1="26" y1="30" x2="66" y2="78"/>
+    <!-- diagonal from right-top down to bottom-left -->
+    <line x1="74" y1="30" x2="34" y2="78"/>
+  </g>
+</svg>

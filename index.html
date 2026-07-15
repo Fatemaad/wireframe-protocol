@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WIREFRAME PROTOCOL // INITIATED</title>
+<style>
+  :root{
+    --bg:#000; --ink:#e8eef2; --muted:#5f6b73; --line:rgba(255,255,255,.16);
+    --line2:rgba(255,255,255,.30); --glow:#8fb6ff; --white:#fff;
+    --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--mono);
+    background-image:
+      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size:38px 38px;
+    min-height:100vh;
+  }
+  .wrap{max-width:720px; margin:0 auto; padding:26px 22px 120px}
+  a{color:inherit}
+  /* ---- top bar ---- */
+  .topbar{display:flex; align-items:center; justify-content:space-between; border:1px solid var(--line); padding:14px 18px; position:relative}
+  .topbar::before,.topbar::after{content:""; position:absolute; width:8px; height:8px; border:1px solid var(--line2)}
+  .topbar::before{top:-1px;left:-1px;border-right:none;border-bottom:none}
+  .topbar::after{bottom:-1px;right:-1px;border-left:none;border-top:none}
+  .brand{display:flex; align-items:center; gap:12px; font-size:13px; letter-spacing:3px; text-transform:uppercase}
+  .brand .mk{width:22px;height:22px;border:1px solid var(--line2); position:relative}
+  .brand .mk::after{content:"";position:absolute;inset:4px;border:1px solid var(--line2);transform:rotate(45deg)}
+  .logos{display:flex; align-items:center; gap:16px}
+  .logos svg{height:24px; width:auto}
+  .logos .umlogo{height:26px; width:auto; display:block}
+  .logos .pnglogo{height:26px; width:auto; display:block; border-radius:6px}
+  .logos .sep{width:1px;height:20px;background:var(--line2)}
+  /* ---- hero ---- */
+  .hero{padding:54px 0 30px; border-bottom:1px solid var(--line)}
+  .kicker{font-size:12px; letter-spacing:5px; color:var(--muted); text-transform:uppercase}
+  h1{font-size:clamp(26px,5vw,40px); margin:14px 0 0; font-weight:400; letter-spacing:1px; line-height:1.02}
+  h1 .thin{color:var(--muted)}
+  .hero p{max-width:560px; color:var(--muted); font-size:13.5px; line-height:1.7; margin:20px 0 0; letter-spacing:.3px}
+  /* ---- section frame ---- */
+  .sec{position:relative; border:1px solid var(--line); margin-top:26px; padding:30px 30px 34px}
+  .sec::before,.sec::after{content:""; position:absolute; width:10px; height:10px; border:1px solid var(--line2)}
+  .sec::before{top:-1px;left:-1px;border-right:none;border-bottom:none}
+  .sec::after{bottom:-1px;right:-1px;border-left:none;border-top:none}
+  .sec .idx{position:absolute; top:-11px; left:22px; background:#000; padding:0 10px; font-size:12px; letter-spacing:4px; color:var(--glow)}
+  .sec h2{font-size:18px; font-weight:400; letter-spacing:2px; text-transform:uppercase; margin:0 0 6px}
+  .sec .desc{color:var(--muted); font-size:12.5px; line-height:1.7; margin:0 0 22px; max-width:640px}
+  /* ---- dropzone ---- */
+  .drop{border:1px dashed var(--line2); padding:40px 20px; text-align:center; cursor:pointer; transition:.18s; position:relative; background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,.012) 10px,rgba(255,255,255,.012) 20px)}
+  .drop:hover,.drop.hot{border-color:var(--glow); background:rgba(143,182,255,.05)}
+  .drop .bracket{font-size:12px; letter-spacing:3px; color:var(--muted); text-transform:uppercase}
+  .drop .t{margin-top:12px; font-size:15px; letter-spacing:1px}
+  .drop .sub{color:var(--muted); font-size:12.5px; margin-top:6px; letter-spacing:.5px}
+  .preview-img{max-width:100%; max-height:300px; display:block; margin:18px auto 0; border:1px solid var(--line2)}
+  /* ---- buttons ---- */
+  .row{display:flex; gap:12px; flex-wrap:wrap; margin-top:22px; align-items:center}
+  .spacer{flex:1}
+  .btn{appearance:none; font-family:var(--mono); border:1px solid var(--line2); background:transparent; color:var(--ink);
+    padding:11px 20px; font-size:13px; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:.15s; position:relative}
+  .btn:hover{background:var(--white); color:#000; border-color:var(--white)}
+  .btn.primary{border-color:var(--white)}
+  .btn.primary::after{content:"";position:absolute;inset:3px;border:1px solid transparent}
+  .btn.primary:hover::after{border-color:rgba(0,0,0,.25)}
+  .btn:disabled{opacity:.3; cursor:not-allowed}
+  .btn:disabled:hover{background:transparent; color:var(--ink); border-color:var(--line2)}
+  .btn.x:hover{background:#111;color:#fff;border-color:#444}
+  .btn.li:hover{background:#0a66c2;color:#fff;border-color:#0a66c2}
+  /* ---- prompt / fields ---- */
+  .label{font-size:12px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; display:block}
+  .promptbox{border:1px solid var(--line); background:rgba(255,255,255,.015); padding:18px; font-size:12px; line-height:1.75; color:#b9c4cc; white-space:pre-wrap; max-height:250px; overflow:auto}
+  .promptbox::-webkit-scrollbar{width:8px} .promptbox::-webkit-scrollbar-thumb{background:var(--line2)}
+  .field{margin-top:18px}
+  input[type=text],input[type=password],textarea{width:100%; background:rgba(255,255,255,.02); border:1px solid var(--line2); color:var(--ink); padding:12px 14px; font-family:var(--mono); font-size:13.5px; letter-spacing:.5px}
+  input:focus,textarea:focus{outline:none; border-color:var(--glow)}
+  textarea{min-height:170px; resize:vertical; line-height:1.6}
+  .note{font-size:12px; color:var(--muted); margin-top:10px; line-height:1.6; letter-spacing:.3px}
+  details{margin-top:20px; border-top:1px solid var(--line); padding-top:16px}
+  summary{cursor:pointer; color:var(--glow); font-size:11.5px; letter-spacing:2px; text-transform:uppercase; list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"[ + ] "; color:var(--muted)}
+  details[open] summary::before{content:"[ - ] "}
+  /* ---- stage / canvas ---- */
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}}
+  .stage{position:relative; border:1px solid var(--line2); background:#000; overflow:hidden}
+  .stage::before,.stage::after{content:"";position:absolute;width:12px;height:12px;border:1px solid var(--glow);opacity:.5;z-index:2}
+  .stage::before{top:6px;left:6px;border-right:none;border-bottom:none}
+  .stage::after{bottom:6px;right:6px;border-left:none;border-top:none}
+  canvas{display:block; width:100%; height:auto}
+  .placeholder{aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:11px; letter-spacing:3px; text-transform:uppercase; text-align:center; padding:20px}
+  .status{font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-top:14px}
+  .status.on{color:var(--glow)}
+  .hype{display:flex; gap:8px; flex-wrap:wrap}
+  .hype-btn{font-family:var(--mono); font-size:12px; letter-spacing:2px; text-transform:uppercase; padding:9px 16px; border:1px solid var(--line2); background:transparent; color:var(--muted); cursor:pointer; transition:.15s}
+  .hype-btn:hover{color:var(--ink); border-color:var(--ink)}
+  .hype-btn.active{background:var(--glow); color:#000; border-color:var(--glow)}
+  .toast{position:fixed; bottom:28px; left:50%; transform:translateX(-50%); border:1px solid var(--white); background:#000; color:#fff; padding:12px 20px; font-size:11px; letter-spacing:2px; text-transform:uppercase; opacity:0; transition:.25s; pointer-events:none; z-index:20}
+  .toast.show{opacity:1}
+  .spin{width:13px;height:13px;border:1px solid rgba(255,255,255,.3);border-top-color:currentColor;border-radius:50%;animation:sp .7s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  footer{margin-top:40px; text-align:center; color:var(--muted); font-size:10.5px; letter-spacing:3px; text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== TOP BAR ===== -->
+  <div class="topbar">
+    <!-- partner logos: top-left -->
+    <div class="logos" id="logoBar">
+      <img id="axiometaLogo" class="pnglogo" alt="AxioMeta">
+      <span class="sep"></span>
+      <img id="anthropicLogo" class="pnglogo" alt="Anthropic">
+      <span class="sep"></span>
+      <img id="umLogo" class="umlogo" alt="Unicorn Mafia">
+    </div>
+  </div>
+
+  <!-- ===== HERO ===== -->
+  <div class="hero">
+    <div class="kicker">Wireframe Protocol // Initiated</div>
+    <h1>Become the <span class="thin">wireframe.</span><br>Solder beside Axie.</h1>
+  </div>
+
+  <!-- ===== 01 UPLOAD ===== -->
+  <section class="sec" id="s1">
+    <span class="idx">01 // SOURCE</span>
+    <h2>Upload your photo</h2>
+    <div class="drop" id="dropzone">
+      <div class="bracket">[ drop file ]</div>
+      <div class="t">Click to upload or drag a photo here</div>
+      <div class="sub">JPG / PNG — headshot recommended</div>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" style="display:none">
+    <div id="uploadPreview" style="display:none"><img class="preview-img" id="uploadImg" alt="source"></div>
+    <div class="status" id="s1status">STATUS // AWAITING INPUT</div>
+  </section>
+
+  <!-- ===== 02 GENERATE ===== -->
+  <section class="sec" id="s2">
+    <span class="idx">02 // RENDER</span>
+    <h2>Generate the wireframe</h2>
+    <div class="row" style="margin-top:6px">
+      <button class="btn primary" id="genBtn" disabled>Generate wireframe</button>
+    </div>
+    <div class="status" id="s2status">STATUS // AWAITING SOURCE</div>
+  </section>
+
+  <!-- ===== 03 SHARE ===== -->
+  <section class="sec" id="s4">
+    <span class="idx">03 // TRANSMIT</span>
+    <h2>Share to your feed</h2>
+    <div class="grid2">
+      <div class="stage" id="stage2"><div class="placeholder" id="ph2">[ awaiting render // module 02 ]</div><canvas id="composer2" style="display:none"></canvas></div>
+      <div>
+        <span class="label">Platform</span>
+        <div class="hype" id="platSel">
+          <button class="hype-btn active" data-plat="li">LinkedIn</button>
+          <button class="hype-btn" data-plat="x">X</button>
+        </div>
+        <span class="label" style="margin-top:18px">Hype level</span>
+        <div class="hype" id="hypeSel">
+          <button class="hype-btn" data-hype="chill">Chill</button>
+          <button class="hype-btn active" data-hype="hyped">Hyped</button>
+          <button class="hype-btn" data-hype="unhinged">Unhinged</button>
+        </div>
+        <span class="label" style="margin-top:18px">Message — everything is included, edit freely</span>
+        <textarea id="caption"></textarea>
+        <div class="note" id="tagNote"></div>
+        <div class="row">
+          <button class="btn primary" id="nativeShare" disabled>Share via device</button>
+          <button class="btn" id="downloadBtn" disabled>Download PNG</button>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn li" id="shareLinkedIn" disabled>Share on LinkedIn</button>
+          <button class="btn x" id="shareX" disabled>Share on X</button>
+        </div>
+        <div class="note">The device share sheet is best for attaching the image directly. The LinkedIn / X buttons open a pre-filled post — attach the downloaded PNG.</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="spacer"></div>
+      <button class="btn" id="startOver">Reset system</button>
+    </div>
+  </section>
+
+  <footer>Wireframe Studio // Axie — UGC Generation Pipeline</footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* Backend endpoint that holds the prompt + API key server-side.
+   Change this if your API route differs. */
+const API_ENDPOINT = '/api/generate';
+
+let uploadedFile=null, resultImage=null, composedBlob=null;
+const $=s=>document.querySelector(s);
+
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1900); }
+
+/* dropzone helper */
+function wireDrop(zone,onFile){
+  zone.addEventListener('click',()=>zone._input.click());
+  ['dragover','dragenter'].forEach(e=>zone.addEventListener(e,ev=>{ev.preventDefault();zone.classList.add('hot')}));
+  ['dragleave','drop'].forEach(e=>zone.addEventListener(e,ev=>{ev.preventDefault();zone.classList.remove('hot')}));
+  zone.addEventListener('drop',ev=>{ if(ev.dataTransfer.files[0]) onFile(ev.dataTransfer.files[0]); });
+}
+
+/* 01 upload */
+const dz=$('#dropzone'), fi=$('#fileInput'); dz._input=fi;
+wireDrop(dz,handleUpload);
+fi.onchange=e=>{ if(e.target.files[0]) handleUpload(e.target.files[0]); };
+function handleUpload(file){
+  uploadedFile=file;
+  $('#uploadImg').src=URL.createObjectURL(file);
+  $('#uploadPreview').style.display='block';
+  const st=$('#s1status'); st.textContent='STATUS // SOURCE LOADED'; st.classList.add('on');
+  $('#genBtn').disabled=false;
+  const g=$('#s2status'); g.textContent='STATUS // READY TO RENDER'; g.classList.add('on');
+}
+
+/* 02 generate — auto, via backend. Prompt + key live server-side. */
+$('#genBtn').onclick=async ()=>{
+  if(!uploadedFile){ toast('Upload a photo first'); return; }
+  const btn=$('#genBtn'), old=btn.textContent; btn.disabled=true; btn.innerHTML='<span class="spin"></span>Rendering';
+  const st=$('#s2status'); st.textContent='STATUS // RENDERING'; st.classList.add('on');
+  try{
+    const fd=new FormData();
+    fd.append('image', uploadedFile);
+    const res=await fetch(API_ENDPOINT,{method:'POST',body:fd});
+    if(!res.ok){ let msg='Render failed'; try{ msg=(await res.json()).error||msg; }catch(e){} throw new Error(msg); }
+    const ct=res.headers.get('content-type')||'';
+    let src;
+    if(ct.includes('application/json')){ const d=await res.json(); src=d.image||('data:image/png;base64,'+d.b64_json); }
+    else { src=URL.createObjectURL(await res.blob()); }
+    const img=new Image();
+    img.onload=()=>{ resultImage=img; renderReady(); toast('Render complete'); $('#s3').scrollIntoView(); };
+    img.src=src;
+  }catch(err){
+    toast('Render failed');
+    const s=$('#s2status'); s.textContent='STATUS // '+(err.message||'ERROR').toUpperCase(); s.classList.remove('on');
+    btn.disabled=false;
+  }
+  finally{ btn.disabled=false; btn.textContent=old; }
+};
+
+/* when a render exists: draw composite + enable everything */
+function renderReady(){
+  const st=$('#s2status'); st.textContent='STATUS // RENDER LOADED'; st.classList.add('on');
+  drawComposite('#composer2');
+  $('#composer2').style.display='block';
+  $('#ph2').style.display='none';
+  ['#downloadBtn','#nativeShare','#shareLinkedIn','#shareX'].forEach(s=>$(s).disabled=false);
+}
+
+/* ---- logos ----
+   Top-left: AxioMeta, Anthropic, Unicorn Mafia.
+   Bottom-left: host logo (drop file into /assets, see BOTTOM_LEFT_LOGO below). */
+const UM_LOGO = 'um-white.svg';
+// image loader helper — redraws composite once each logo is ready
+function loadImg(src){ const im=new Image(); im._ready=false; im.onload=()=>{ im._ready=true; if(resultImage) drawComposite('#composer2'); }; im.onerror=()=>{ im._ready=false; }; if(src) im.src=src; return im; }
+const LG = (window.LOGOS||{});
+// top-left partner logos
+const umImg = loadImg(UM_LOGO);
+const anthImg = loadImg('assets/Anthropic.png');
+const axiometaImg = loadImg('assets/axiometa.jpg');
+// sponsor logos — loaded dynamically from whatever is in assets/ (server decides, excludes axie/anthropic)
+let sponsorLogos = [];
+fetch('/api/logos').then(r=>r.json()).then(d=>{
+  sponsorLogos = (d.sponsors||[]).map(name => { const im=loadImg('assets/'+encodeURIComponent(name)); im._name=name; return im; });
+}).catch(()=>{});
+// header images
+const umHeader=document.getElementById('umLogo'); if(umHeader) umHeader.src=UM_LOGO;
+const anthHeader=document.getElementById('anthropicLogo'); if(anthHeader) anthHeader.src='assets/Anthropic.png';
+const axiometaHeader=document.getElementById('axiometaLogo'); if(axiometaHeader) axiometaHeader.src='assets/axiometa.jpg';
+
+// EXACT Axie — the same robot composited into every render.
+// Drop the exact Axie artwork at assets/axie.png. It's recoloured to white
+// line-art on a transparent background so it matches the wireframe style.
+let axieProc=null;
+const axieImg=new Image();
+axieImg.onload=()=>{ try{ axieProc=processAxie(axieImg); }catch(e){ axieProc=null; } if(resultImage) drawComposite('#composer2'); };
+axieImg.onerror=()=>{ axieProc=null; };
+axieImg.src='assets/axie.png';
+function processAxie(img){
+  const c=document.createElement('canvas'); c.width=img.width; c.height=img.height;
+  const x=c.getContext('2d'); x.drawImage(img,0,0);
+  const d=x.getImageData(0,0,c.width,c.height); const p=d.data;
+  for(let i=0;i<p.length;i+=4){
+    const lum=(p[i]+p[i+1]+p[i+2])/3;   // brightness of this pixel
+    const ink=255-lum;                  // dark line -> lots of ink, white bg -> none
+    const a=Math.round(ink*(p[i+3]/255)); // keep any existing transparency, smooth edges
+    p[i]=255; p[i+1]=255; p[i+2]=255; p[i+3]=a;  // paint white, alpha = ink
+  }
+  x.putImageData(d,0,0); return c;
+}
+
+// draw an image logo scaled to a target height, return width consumed
+function drawImgLogo(ctx,img,x,y,h){ if(!img||!img._ready) return 0; const w=h*(img.width/img.height||1); ctx.drawImage(img,x,y,w,h); return w; }
+
+// grayscale a logo by processing pixels (works in every browser, unlike ctx.filter in Safari)
+function grayVersion(img){
+  if(!img||!img._ready) return null;
+  if(img._gray) return img._gray;
+  const c=document.createElement('canvas'); c.width=img.width; c.height=img.height;
+  const g=c.getContext('2d'); g.drawImage(img,0,0);
+  try{
+    const d=g.getImageData(0,0,c.width,c.height); const p=d.data;
+    for(let i=0;i<p.length;i+=4){
+      const l=Math.min(255,Math.round((0.299*p[i]+0.587*p[i+1]+0.114*p[i+2])*1.15));
+      p[i]=p[i+1]=p[i+2]=l;   // keep alpha (p[i+3]) as-is
+    }
+    g.putImageData(d,0,0);
+  }catch(e){}
+  img._gray=c; return c;
+}
+function drawGrayLogo(ctx,img,x,y,h){ const c=grayVersion(img); if(!c) return 0; const w=h*(c.width/c.height||1); ctx.drawImage(c,x,y,w,h); return w; }
+
+// small white wireframe circuit board (PCB) — drawn into Axie's hands
+function drawPCB(ctx,cx,cy,w,h){
+  ctx.save();
+  const x0=cx-w/2, y0=cy-h/2;
+  ctx.fillStyle='#000'; ctx.fillRect(x0-2,y0-2,w+4,h+4);          // knock out lines behind it
+  ctx.strokeStyle='#ffffff'; ctx.lineWidth=2; ctx.strokeRect(x0,y0,w,h);
+  ctx.strokeStyle='rgba(255,255,255,.6)'; ctx.lineWidth=1;
+  for(let i=1;i<3;i++){ const yy=y0+h*i/3; ctx.beginPath(); ctx.moveTo(x0,yy); ctx.lineTo(x0+w,yy); ctx.stroke(); }
+  for(let i=1;i<6;i++){ const xx=x0+w*i/6; ctx.beginPath(); ctx.moveTo(xx,y0); ctx.lineTo(xx,y0+h); ctx.stroke(); }
+  ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.strokeRect(x0+w*0.40,y0+h*0.28,w*0.20,h*0.44);  // chip
+  ctx.restore();
+}
+
+// draws the full still scene (render + logos + coords + sponsors) into any ctx
+function drawSceneInto(ctx,W,H){
+  ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+  ctx.drawImage(resultImage,0,0,W,H);
+  const pad=34, gap=20, lh=42;
+
+  // TOP-LEFT: AxioMeta, Anthropic, Unicorn Mafia
+  let x=pad;
+  x+=drawImgLogo(ctx,axiometaImg,x,pad,lh)+gap;
+  x+=drawImgLogo(ctx,anthImg,x,pad,lh)+gap;
+  x+=drawImgLogo(ctx,umImg,x,pad,lh)+gap;
+
+  // TOP-RIGHT: London coordinates, sponsor logos beneath (black & white)
+  ctx.textAlign='right';
+  ctx.fillStyle='#ffffff';
+  ctx.font='500 19px ui-monospace, Menlo, Consolas, monospace';
+  ctx.fillText('51.5074° N, 0.1278° W', W-pad, pad+18);
+  ctx.textAlign='left';
+  const sh=28, sgap=13; let syy=pad+34;
+  const ready=sponsorLogos.filter(im=>im && im._ready && grayVersion(im));
+  ready.forEach(im=>{
+    const c=grayVersion(im);
+    let sW=c.width;
+    if(/bambu/i.test(im._name||'')){ sW=Math.min(c.width,c.height); }  // crop to square icon
+    const hh = /modal/i.test(im._name||'') ? sh*0.68 : sh;             // Modal smaller
+    const w=hh*(sW/c.height);
+    ctx.drawImage(c, 0,0,sW,c.height, W-pad-w, syy, w, hh);
+    syy+=hh+sgap;
+  });
+  drawCorners(ctx,W,H);
+}
+
+function drawComposite(sel){
+  const cv=document.querySelector(sel); if(!resultImage) return;
+  const W=1024, H=Math.round(W*(resultImage.height/resultImage.width))||1024;
+  cv.width=W; cv.height=H;
+  const ctx=cv.getContext('2d');
+  drawSceneInto(ctx,W,H);
+  cv.toBlob(b=>composedBlob=b,'image/png');
+}
+
+function drawAxioMeta(ctx,leftX,top,h){ const w=h,s=w/100;
+  ctx.save(); ctx.translate(leftX,top); ctx.scale(s,s); ctx.strokeStyle='#fff'; ctx.lineWidth=8; ctx.lineCap='square';
+  L(ctx,26,30,26,58); L(ctx,74,30,74,58); L(ctx,26,30,66,78); L(ctx,74,30,34,78); ctx.restore(); return w; }
+function drawAnthropic(ctx,leftX,top,h){ const w=h*0.72,s=h/100;
+  ctx.save(); ctx.translate(leftX,top); ctx.scale(s,s); ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.moveTo(6,74); ctx.lineTo(19,26); ctx.lineTo(27,26); ctx.lineTo(14,74); ctx.closePath(); ctx.fill();
+  ctx.fillRect(33,26,9,48); ctx.restore(); return w; }
+function L(ctx,a,b,c,d){ ctx.beginPath(); ctx.moveTo(a,b); ctx.lineTo(c,d); ctx.stroke(); }
+function drawCorners(ctx,W,H){ ctx.save(); ctx.strokeStyle='rgba(143,182,255,.9)'; ctx.lineWidth=3; const ci=18, cl=48;
+  ctx.beginPath();
+  ctx.moveTo(ci,ci+cl); ctx.lineTo(ci,ci); ctx.lineTo(ci+cl,ci);
+  ctx.moveTo(W-ci-cl,ci); ctx.lineTo(W-ci,ci); ctx.lineTo(W-ci,ci+cl);
+  ctx.moveTo(ci,H-ci-cl); ctx.lineTo(ci,H-ci); ctx.lineTo(ci+cl,H-ci);
+  ctx.moveTo(W-ci-cl,H-ci); ctx.lineTo(W-ci,H-ci); ctx.lineTo(W-ci,H-ci-cl);
+  ctx.stroke(); ctx.restore(); }
+
+/* 03 share — hype levels + platform, all tags/link inside the message */
+// full post body per hype level; {U}=unicorn mafia, {S}=sponsors, {P}=people, {L}=link
+const BODY = {
+  chill:    t=>`Honored to be invited to the ${t.AX} x ${t.AN} Hackathon, powered by ${t.U}. Got wireframed alongside Axie and ready to build something great. #Axie\n\nHuge thanks to our sponsors ${t.S} and the people who made this happen ${t.P}. Special thanks to ${t.H} for hosting us.\n\n${t.L}`,
+  hyped:    t=>`IT'S ON. Just got invited to the ${t.AX} x ${t.AN} Hackathon, powered by ${t.U} — and got wireframed next to Axie while I'm at it. Let's build something legendary. #Axie\n\nPowered by our incredible sponsors ${t.S}, and made real by ${t.P}. Special thanks to ${t.H} for hosting us.\n\n${t.L}`,
+  unhinged: t=>`Wired in. Soldered up. Axie riding shotgun. I just scored an invite to the ${t.AX} x ${t.AN} Hackathon powered by ${t.U} and I'm all the way in. Come build the impossible with us. #Axie\n\nMassive shoutout to our sponsors ${t.S} and the crew who made it happen ${t.P}. Special thanks to ${t.H} for hosting us.\n\n${t.L}`
+};
+// per-platform handles + link. AX=AxioMeta, AN=Anthropic, U=Unicorn Mafia, S=sponsors, P=people, L=link
+const PLAT = {
+  li: { AX:'@axiometa', AN:'@anthropicresearch', U:'@unicorn-mafia', S:'@modal-labs @linkup-platform @elevenlabs @bambulab', P:'@fatemaalkhalifa @povilasdumcius @lamis-mukta', H:'@oliland from @Halkin', L:'axiometa.io' },
+  x:  { AX:'@axiometa', AN:'@AnthropicAI', U:'@unicorn_mafia', S:'@modal @BambulabGlobal linkup', P:'@fatemallk @dumciusP', H:'@oliland from @Halkin', L:'https://t.co/PkQtAArwF1' }
+};
+let hype='hyped', plat='li';
+function buildMsg(){ $('#caption').value = BODY[hype](PLAT[plat]); }
+function setActive(container,attr,val){ $(container).querySelectorAll('.hype-btn').forEach(x=>x.classList.toggle('active', x.dataset[attr]===val)); }
+$('#hypeSel').addEventListener('click',e=>{ const b=e.target.closest('.hype-btn'); if(!b)return; hype=b.dataset.hype; setActive('#hypeSel','hype',hype); buildMsg(); });
+$('#platSel').addEventListener('click',e=>{ const b=e.target.closest('.hype-btn'); if(!b)return; plat=b.dataset.plat; setActive('#platSel','plat',plat); buildMsg(); });
+function setPlat(p){ if(plat!==p){ plat=p; setActive('#platSel','plat',p); buildMsg(); } }
+$('#tagNote').textContent='Pick a platform to load its handles + link. Everything is in the box — edit before posting if you like.';
+buildMsg();
+
+async function ensureBlob(){ if(!composedBlob) drawComposite('#composer2'); return composedBlob; }
+function dl(blob){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='wireframe-axie.png'; a.click(); }
+
+$('#downloadBtn').onclick=async ()=>{ const b=await ensureBlob(); if(b){ dl(b); toast('Downloaded'); } };
+$('#nativeShare').onclick=async ()=>{
+  const blob=await ensureBlob(); if(!blob) return;
+  const file=new File([blob],'wireframe-axie.png',{type:'image/png'});
+  if(navigator.canShare && navigator.canShare({files:[file]})){ try{ await navigator.share({files:[file], text:$('#caption').value}); }catch(e){} }
+  else toast('Device share not supported — use the buttons');
+};
+$('#shareX').onclick=async ()=>{
+  setPlat('x');
+  const blob=await ensureBlob(); if(blob) dl(blob);
+  window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent($('#caption').value),'_blank');
+  toast('Image downloaded — attach to post');
+};
+$('#shareLinkedIn').onclick=async ()=>{
+  setPlat('li');
+  const blob=await ensureBlob(); if(blob) dl(blob);
+  navigator.clipboard && navigator.clipboard.writeText($('#caption').value).catch(()=>{});
+  window.open('https://www.linkedin.com/feed/?shareActive=true','_blank');
+  toast('Post copied + image downloaded — paste and attach');
+};
+
+$('#startOver').onclick=()=>{
+  uploadedFile=null; resultImage=null; composedBlob=null; fi.value='';
+  $('#uploadPreview').style.display='none';
+  $('#composer2').style.display='none';
+  $('#ph2').style.display='flex';
+  $('#genBtn').disabled=true;
+  ['#downloadBtn','#nativeShare','#shareLinkedIn','#shareX'].forEach(s=>$(s).disabled=true);
+  const a=$('#s1status'),b=$('#s2status'); a.textContent='STATUS // AWAITING INPUT'; b.textContent='STATUS // AWAITING SOURCE'; a.classList.remove('on'); b.classList.remove('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+</script>
+</body>
+</html>

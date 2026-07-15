@@ -1,0 +1,21 @@
+WIREFRAME + AXIE — IMAGE TRANSFORMATION PROMPT
+(paste this into your image-to-image / edit tool along with the user's uploaded photo)
+
+Transform the uploaded photo of the person into a monochrome 3D WIREFRAME portrait,
+rendered as thin white mesh lines on a solid black background.
+
+Keep the person's recognizable likeness — same hairstyle, face shape, and pose — but
+render their entire head, body and clothing as a fine white polygonal wireframe grid,
+like a 3D model viewport with visible quad topology and clean contour lines. Faint
+glowing eyes.
+
+The person is seated and focused, holding a soldering iron with a thin wisp of smoke
+rising from it, working on a small exposed circuit board held in their other hand.
+
+Seated right beside them is a cute chibi robot named "Axie": a round-headed wireframe
+robot with two large solid black oval eyes, one small side ear/port, and a short rounded
+body with stubby arms and legs — rendered in the exact same white wireframe mesh style.
+
+STYLE: consistent thin line weight, pure white lines only, no color, no shaded fills,
+solid #000000 background, elegant technical-illustration / 3D-scan aesthetic, portrait
+orientation, subject centered, high detail.
