@@ -33,14 +33,18 @@ Add exactly ONE small robot — Axi, from the SECOND image — in the bottom-rig
 
 No colour, no text, no logos, lots of negative space.`;
 
-// Load the Axie reference once at startup -> data URI (sent as 2nd source image)
+// Load the Axie reference once at startup -> data URI (sent as 2nd source image).
+// Find it case-insensitively so it works on Linux servers too (macOS is case-insensitive).
 let AXIE_REF = null;
 try {
-  const p = path.join(__dirname, 'assets', 'axie.png');
-  AXIE_REF = 'data:image/png;base64,' + fs.readFileSync(p).toString('base64');
-  console.log('Axie reference loaded from assets/axie.png');
+  const dir = path.join(__dirname, 'assets');
+  const file = fs.readdirSync(dir).find(f => /axie\.(png|jpe?g|webp)$/i.test(f));
+  if (!file) throw new Error('no axie image');
+  const mime = /\.(jpe?g)$/i.test(file) ? 'image/jpeg' : (/\.webp$/i.test(file) ? 'image/webp' : 'image/png');
+  AXIE_REF = `data:${mime};base64,` + fs.readFileSync(path.join(dir, file)).toString('base64');
+  console.log('Axie reference loaded from assets/' + file);
 } catch (e) {
-  console.warn('WARNING: assets/axie.png not found — generating without the Axie reference.');
+  console.warn('WARNING: no Axie image found in assets/ — generating without the Axie reference.');
 }
 
 // Optional STYLE anchor: drop the look you want at assets/style-ref.png
