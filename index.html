@@ -426,14 +426,14 @@ function drawCorners(ctx,W,H){ ctx.save(); ctx.strokeStyle='rgba(143,182,255,.9)
 /* 03 share — hype levels + platform, all tags/link inside the message */
 // full post body per hype level; {U}=unicorn mafia, {S}=sponsors, {P}=people, {L}=link
 const BODY = {
-  chill:    t=>`Honored to be invited to the ${t.AX} x ${t.AN} Hackathon, powered by ${t.U}. Got wireframed alongside Axie and ready to build something great. #Axie\n\nHuge thanks to our sponsors ${t.S} and the people who made this happen ${t.P}. Special thanks to ${t.H} for hosting us.\n\n${t.L}`,
-  hyped:    t=>`IT'S ON. Just got invited to the ${t.AX} x ${t.AN} Hackathon, powered by ${t.U} — and got wireframed next to Axie while I'm at it. Let's build something legendary. #Axie\n\nPowered by our incredible sponsors ${t.S}, and made real by ${t.P}. Special thanks to ${t.H} for hosting us.\n\n${t.L}`,
-  unhinged: t=>`Wired in. Soldered up. Axie riding shotgun. I just scored an invite to the ${t.AX} x ${t.AN} Hackathon powered by ${t.U} and I'm all the way in. Come build the impossible with us. #Axie\n\nMassive shoutout to our sponsors ${t.S} and the crew who made it happen ${t.P}. Special thanks to ${t.H} for hosting us.\n\n${t.L}`
+  chill:    t=>`Honored to be invited to the ${t.AX} x ${t.AN} Hackathon, powered by ${t.U}. Got wireframed alongside Axie and ready to build something great. #Axie\n\nHuge thanks to ${t.THANKS} for making this happen.\n\n${t.L}`,
+  hyped:    t=>`IT'S ON. Just got invited to the ${t.AX} x ${t.AN} Hackathon, powered by ${t.U} — and got wireframed next to Axie while I'm at it. Let's build something legendary. #Axie\n\nHuge thanks to ${t.THANKS} for making this happen.\n\n${t.L}`,
+  unhinged: t=>`Wired in. Soldered up. Axie riding shotgun. I just scored an invite to the ${t.AX} x ${t.AN} Hackathon powered by ${t.U} and I'm all the way in. Come build the impossible with us. #Axie\n\nHuge thanks to ${t.THANKS} for making this happen.\n\n${t.L}`
 };
-// per-platform handles + link. AX=AxioMeta, AN=Anthropic, U=Unicorn Mafia, S=sponsors, P=people, L=link
+// per-platform handles + link. AX=AxioMeta, AN=Anthropic, U=Unicorn Mafia, THANKS=credits, L=link
 const PLAT = {
-  li: { AX:'@axiometa', AN:'@anthropicresearch', U:'@unicorn-mafia', S:'@modal-labs @linkup-platform @elevenlabs @bambulab', P:'@fatemaalkhalifa @povilasdumcius @lamis-mukta', H:'@oliland from @Halkin', L:'axiometa.io' },
-  x:  { AX:'@axiometa', AN:'@AnthropicAI', U:'@unicorn_mafia', S:'@modal @BambulabGlobal linkup', P:'@fatemallk @dumciusP', H:'@oliland from @Halkin', L:'https://t.co/PkQtAArwF1' }
+  li: { AX:'@axiometa', AN:'@anthropicresearch', U:'@unicorn-mafia', THANKS:'@sacha-uzan23, @povilasdumcius, @lamis-mukta, @bambulab, @modal-labs, @oliland, @ellenleelbs and @seedcamp', L:'axiometa.io' },
+  x:  { AX:'@axiometa', AN:'@AnthropicAI', U:'@unicorn_mafia', THANKS:'Sacha Uzan, Povilas Dumcius, Lamis Mukta, Bambu Lab, Modal, Oli Kingshott, Ellen Lee and Seedcamp', L:'https://t.co/PkQtAArwF1' }
 };
 let hype='hyped', plat='li';
 function buildMsg(){ $('#caption').value = BODY[hype](PLAT[plat]); }
