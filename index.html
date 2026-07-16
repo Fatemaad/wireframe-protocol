@@ -177,6 +177,10 @@
           <button class="btn" id="downloadBtn" disabled>Download PNG</button>
         </div>
         <div class="row" style="margin-top:10px">
+          <button class="btn" id="animateBtn" disabled>Make it move (GIF)</button>
+        </div>
+        <div class="note">"Make it move" animates the render (she solders, smoke rises) and downloads a looping GIF for LinkedIn. Takes ~1 minute and uses your Grok video credits.</div>
+        <div class="row" style="margin-top:10px">
           <button class="btn li" id="shareLinkedIn" disabled>Share on LinkedIn</button>
           <button class="btn x" id="shareX" disabled>Share on X</button>
         </div>
@@ -255,7 +259,7 @@ function renderReady(){
   drawComposite('#composer2');
   $('#composer2').style.display='block';
   $('#ph2').style.display='none';
-  ['#downloadBtn','#nativeShare','#shareLinkedIn','#shareX'].forEach(s=>$(s).disabled=false);
+  ['#downloadBtn','#nativeShare','#shareLinkedIn','#shareX','#animateBtn'].forEach(s=>$(s).disabled=false);
 }
 
 /* ---- logos ----
@@ -334,11 +338,17 @@ function drawPCB(ctx,cx,cy,w,h){
   ctx.restore();
 }
 
-// draws the full still scene (render + logos + coords + sponsors) into any ctx
+// draws the full still scene (render + branding) into any ctx
 function drawSceneInto(ctx,W,H){
   ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
   ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
   ctx.drawImage(resultImage,0,0,W,H);
+  drawBrandingInto(ctx,W,H);
+}
+
+// draws ONLY the branding (logos + coords + sponsors + corners) — used for the animated overlay
+function drawBrandingInto(ctx,W,H){
+  ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
   const pad=34, gap=20, lh=42;
 
   // TOP-LEFT: AxioMeta, Anthropic, Unicorn Mafia
@@ -364,7 +374,6 @@ function drawSceneInto(ctx,W,H){
     ctx.drawImage(c, 0,0,sW,c.height, W-pad-w, syy, w, hh);
     syy+=hh+sgap;
   });
-  drawCorners(ctx,W,H);
 }
 
 function drawComposite(sel){
@@ -374,6 +383,31 @@ function drawComposite(sel){
   const ctx=cv.getContext('2d');
   drawSceneInto(ctx,W,H);
   cv.toBlob(b=>composedBlob=b,'image/png');
+}
+
+// ---- Make it move: send raw render + branding overlay to /api/animate, get a looping GIF ----
+async function animateGif(btn){
+  if(!resultImage){ toast('Generate first'); return; }
+  const old=btn.textContent; btn.disabled=true; btn.innerHTML='<span class="spin"></span>Animating… ~1 min';
+  try{
+    const W=1024, H=Math.round(W*(resultImage.height/resultImage.width))||1024;
+    // raw render only (person + axie) — this is what the video model animates
+    const rc=document.createElement('canvas'); rc.width=W; rc.height=H;
+    rc.getContext('2d').drawImage(resultImage,0,0,W,H);
+    const image=rc.toDataURL('image/png');
+    // transparent branding overlay (logos/coords/corners) — composited on top, stays crisp & static
+    const oc=document.createElement('canvas'); oc.width=W; oc.height=H;
+    drawBrandingInto(oc.getContext('2d'),W,H);
+    const overlay=oc.toDataURL('image/png');
+
+    const res=await fetch('/api/animate',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ image, overlay, duration:5 })});
+    if(!res.ok){ let m='Animate failed'; try{ m=(await res.json()).error||m; }catch(e){} throw new Error(m); }
+    const blob=await res.blob();
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='wireframe-axie.gif'; a.click();
+    toast('Animated GIF downloaded');
+  }catch(err){ alert('Animate failed: '+err.message); }
+  finally{ btn.disabled=false; btn.textContent=old; }
 }
 
 function drawAxioMeta(ctx,leftX,top,h){ const w=h,s=w/100;
@@ -415,6 +449,11 @@ buildMsg();
 
 async function ensureBlob(){ if(!composedBlob) drawComposite('#composer2'); return composedBlob; }
 function dl(blob){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='wireframe-axie.png'; a.click(); }
+// robust clipboard copy — runs synchronously so it keeps the click's permission, with a fallback
+function copyText(t){
+  try{ if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(t); return true; } }catch(e){}
+  try{ const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.top='-1000px'; document.body.appendChild(ta); ta.focus(); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); return true; }catch(e){ return false; }
+}
 
 $('#downloadBtn').onclick=async ()=>{ const b=await ensureBlob(); if(b){ dl(b); toast('Downloaded'); } };
 $('#nativeShare').onclick=async ()=>{
@@ -429,12 +468,13 @@ $('#shareX').onclick=async ()=>{
   window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent($('#caption').value),'_blank');
   toast('Image downloaded — attach to post');
 };
+$('#animateBtn').onclick=()=>animateGif($('#animateBtn'));
 $('#shareLinkedIn').onclick=async ()=>{
   setPlat('li');
+  copyText($('#caption').value);                 // copy FIRST, while the click is still "fresh"
   const blob=await ensureBlob(); if(blob) dl(blob);
-  navigator.clipboard && navigator.clipboard.writeText($('#caption').value).catch(()=>{});
   window.open('https://www.linkedin.com/feed/?shareActive=true','_blank');
-  toast('Post copied + image downloaded — paste and attach');
+  toast('Caption copied — paste into LinkedIn with Cmd+V, then attach the image');
 };
 
 $('#startOver').onclick=()=>{
@@ -443,7 +483,7 @@ $('#startOver').onclick=()=>{
   $('#composer2').style.display='none';
   $('#ph2').style.display='flex';
   $('#genBtn').disabled=true;
-  ['#downloadBtn','#nativeShare','#shareLinkedIn','#shareX'].forEach(s=>$(s).disabled=true);
+  ['#downloadBtn','#nativeShare','#shareLinkedIn','#shareX','#animateBtn'].forEach(s=>$(s).disabled=true);
   const a=$('#s1status'),b=$('#s2status'); a.textContent='STATUS // AWAITING INPUT'; b.textContent='STATUS // AWAITING SOURCE'; a.classList.remove('on'); b.classList.remove('on');
   window.scrollTo({top:0,behavior:'smooth'});
 };

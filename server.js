@@ -14,6 +14,9 @@ const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
+const crypto = require('crypto');
+const { execFile } = require('child_process');
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 12 * 1024 * 1024 } });
@@ -106,6 +109,82 @@ app.post('/api/generate', upload.single('image'), async (req, res) => {
     res.json({ image });
   } catch (err) {
     res.status(500).json({ error: err.message || 'Server error' });
+  }
+});
+
+// ---------- ANIMATE: Grok image-to-video -> ffmpeg -> looping GIF ----------
+// Resolve ffmpeg even when it isn't on the Node process PATH (common with Homebrew on macOS)
+const FFMPEG = process.env.FFMPEG_PATH
+  || ['/opt/homebrew/bin/ffmpeg', '/usr/local/bin/ffmpeg', '/usr/bin/ffmpeg', '/opt/local/bin/ffmpeg'].find(p => { try { return fs.existsSync(p); } catch (e) { return false; } })
+  || 'ffmpeg';
+const FF_ENV = { ...process.env, PATH: (process.env.PATH || '') + ':/opt/homebrew/bin:/usr/local/bin:/usr/bin:/opt/local/bin' };
+console.log('ffmpeg path:', FFMPEG);
+function ff(args) {
+  return new Promise((resolve, reject) => {
+    execFile(FFMPEG, args, { maxBuffer: 1 << 28, env: FF_ENV }, (e, so, se) => e ? reject(new Error(se || e.message)) : resolve());
+  });
+}
+const MOTION_PROMPT = `Subtle, seamless looping animation of this flat white wireframe line-art image on solid black. The person gently moves as she solders the small PCB — small hand and soldering-iron motions — and a thin wisp of white smoke drifts and curls upward from the PCB. Keep the EXACT same flat white wireframe line-art style, no colour, no shading. Minimal camera movement, elegant and understated.`;
+
+app.post('/api/animate', express.json({ limit: '30mb' }), async (req, res) => {
+  const tmp = os.tmpdir();
+  const id = crypto.randomBytes(6).toString('hex');
+  const f = (s) => path.join(tmp, `wf-${id}${s}`);
+  const cleanup = [];
+  try {
+    if (!XAI_API_KEY) return res.status(500).json({ error: 'Server missing XAI_API_KEY' });
+    const { image, overlay, duration } = req.body || {};
+    if (!image) return res.status(400).json({ error: 'No image provided' });
+
+    // 1) start the video job
+    const startR = await fetch('https://api.x.ai/v1/videos/generations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${XAI_API_KEY}` },
+      body: JSON.stringify({ model: 'grok-imagine-video-1.5', prompt: MOTION_PROMPT, image: { url: image }, duration: duration || 5 })
+    });
+    const startData = await startR.json();
+    if (!startR.ok) return res.status(startR.status).json({ error: startData.error?.message || startData.error || 'Video start failed' });
+    const reqId = startData.request_id || startData.id;
+    if (!reqId) return res.status(502).json({ error: 'No request_id returned by video API' });
+
+    // 2) poll until done (up to ~5 min)
+    let videoUrl = null;
+    for (let i = 0; i < 60; i++) {
+      await new Promise(r => setTimeout(r, 5000));
+      const pR = await fetch('https://api.x.ai/v1/videos/' + reqId, { headers: { Authorization: `Bearer ${XAI_API_KEY}` } });
+      const pD = await pR.json();
+      const st = (pD.status || '').toLowerCase();
+      if (st === 'done' || st === 'completed' || st === 'succeeded') { videoUrl = pD.video?.url || pD.url || (pD.data && pD.data[0] && pD.data[0].url); break; }
+      if (st === 'failed' || st === 'expired' || st === 'error') return res.status(502).json({ error: 'Video job ' + st });
+    }
+    if (!videoUrl) return res.status(504).json({ error: 'Video generation timed out' });
+
+    // 3) download mp4
+    const mp4 = f('.mp4'); cleanup.push(mp4);
+    fs.writeFileSync(mp4, Buffer.from(await (await fetch(videoUrl)).arrayBuffer()));
+
+    // 4) ffmpeg -> gif (overlay static branding if provided)
+    const pal = f('-pal.png'); cleanup.push(pal);
+    const gif = f('.gif'); cleanup.push(gif);
+    let vsrc = mp4;
+    if (overlay) {
+      const ov = f('-ov.png'); cleanup.push(ov);
+      fs.writeFileSync(ov, Buffer.from(overlay.split(',')[1], 'base64'));
+      const overlaid = f('-ov.mp4'); cleanup.push(overlaid);
+      await ff(['-y', '-i', mp4, '-i', ov, '-filter_complex', '[0:v]scale=1024:1024[b];[b][1:v]overlay=0:0', '-an', overlaid]);
+      vsrc = overlaid;
+    }
+    await ff(['-y', '-i', vsrc, '-vf', 'fps=15,scale=720:-1:flags=lanczos,palettegen', pal]);
+    await ff(['-y', '-i', vsrc, '-i', pal, '-lavfi', 'fps=15,scale=720:-1:flags=lanczos[x];[x][1:v]paletteuse', '-loop', '0', gif]);
+
+    const gifBuf = fs.readFileSync(gif);
+    res.setHeader('Content-Type', 'image/gif');
+    res.send(gifBuf);
+  } catch (err) {
+    const msg = /ENOENT/.test(err.message) ? 'ffmpeg not found on this machine — install it with: brew install ffmpeg' : (err.message || 'Animate error');
+    res.status(500).json({ error: msg });
+  } finally {
+    cleanup.forEach(p => { try { fs.unlinkSync(p); } catch (e) {} });
   }
 });
 
