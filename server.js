@@ -59,17 +59,41 @@ try {
 
 app.use(express.static(__dirname));
 
-// List sponsor logos in assets/ (any image), excluding Axie, Anthropic, the style ref and Unicorn Mafia.
+// read a project file as a base64 data URI (or null) — used to inline logos reliably
+function dataUri(rel) {
+  try {
+    const buf = fs.readFileSync(path.join(__dirname, rel));
+    const ext = path.extname(rel).toLowerCase();
+    const mime = ext === '.svg' ? 'image/svg+xml' : (ext === '.jpg' || ext === '.jpeg') ? 'image/jpeg' : ext === '.webp' ? 'image/webp' : 'image/png';
+    return `data:${mime};base64,` + buf.toString('base64');
+  } catch (e) { return null; }
+}
+
+// Sponsor logos (any image in assets/, excluding brand/axie), inlined as data URIs
 app.get('/api/logos', (req, res) => {
   try {
-    const dir = path.join(__dirname, 'assets');
-    const files = fs.readdirSync(dir)
+    const files = fs.readdirSync(path.join(__dirname, 'assets'))
       .filter(f => /\.(png|jpe?g|webp|svg)$/i.test(f))
-      .filter(f => !/(axie|axiometa|style-ref|anthropic|um[-_]?white|unicorn|seedcamp)/i.test(f));
-    res.json({ sponsors: files.sort() });
+      .filter(f => !/(axie|axiometa|style-ref|anthropic|um[-_]?white|unicorn|seedcamp)/i.test(f))
+      .sort();
+    res.json({ sponsors: files.map(f => ({ name: f, data: dataUri('assets/' + f) })) });
   } catch (e) {
     res.json({ sponsors: [] });
   }
+});
+
+// Brand logos, resolved case-insensitively and inlined as data URIs (Linux + reliability fix)
+app.get('/api/brand', (req, res) => {
+  let aFiles = [], rFiles = [];
+  try { aFiles = fs.readdirSync(path.join(__dirname, 'assets')); } catch (e) {}
+  try { rFiles = fs.readdirSync(__dirname); } catch (e) {}
+  const findA = re => { const f = aFiles.find(x => re.test(x)); return f ? dataUri('assets/' + f) : null; };
+  const findR = re => { const f = rFiles.find(x => re.test(x)); return f ? dataUri(f) : null; };
+  res.json({
+    axiometa:  findA(/axiometa\.(png|jpe?g|webp|svg)$/i),
+    anthropic: findA(/anthropic\.(png|jpe?g|webp|svg)$/i),
+    um:        findA(/(um[-_]?white|unicorn)\.(png|jpe?g|webp|svg)$/i) || findR(/(um[-_]?white|unicorn)\.(png|jpe?g|webp|svg)$/i)
+  });
 });
 
 async function urlToDataUri(url) {

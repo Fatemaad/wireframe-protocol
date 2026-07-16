@@ -179,12 +179,10 @@
         <div class="row" style="margin-top:10px">
           <button class="btn" id="animateBtn" disabled>Make it move (GIF)</button>
         </div>
-        <div class="note">"Make it move" animates the render (she solders, smoke rises) and downloads a looping GIF for LinkedIn. Takes ~1 minute and uses your Grok video credits.</div>
         <div class="row" style="margin-top:10px">
           <button class="btn li" id="shareLinkedIn" disabled>Share on LinkedIn</button>
           <button class="btn x" id="shareX" disabled>Share on X</button>
         </div>
-        <div class="note">The device share sheet is best for attaching the image directly. The LinkedIn / X buttons open a pre-filled post — attach the downloaded PNG.</div>
       </div>
     </div>
     <div class="row">
@@ -268,20 +266,19 @@ function renderReady(){
 const UM_LOGO = 'um-white.svg';
 // image loader helper — redraws composite once each logo is ready
 function loadImg(src){ const im=new Image(); im._ready=false; im.onload=()=>{ im._ready=true; if(resultImage) drawComposite('#composer2'); }; im.onerror=()=>{ im._ready=false; }; if(src) im.src=src; return im; }
-const LG = (window.LOGOS||{});
-// top-left partner logos
-const umImg = loadImg(UM_LOGO);
-const anthImg = loadImg('assets/Anthropic.png');
-const axiometaImg = loadImg('assets/axiometa.jpg');
-// sponsor logos — loaded dynamically from whatever is in assets/ (server decides, excludes axie/anthropic)
+// TOP-LEFT brand logos — resolved + inlined by the server (reliable, case-insensitive)
+const umImg = new Image(), anthImg = new Image(), axiometaImg = new Image();
+[umImg,anthImg,axiometaImg].forEach(im=>{ im._ready=false; im.onload=()=>{ im._ready=true; if(resultImage) drawComposite('#composer2'); }; im.onerror=()=>{ im._ready=false; }; });
+fetch('/api/brand').then(r=>r.json()).then(b=>{
+  if(b.axiometa){ axiometaImg.src=b.axiometa; const h=document.getElementById('axiometaLogo'); if(h) h.src=b.axiometa; }
+  if(b.anthropic){ anthImg.src=b.anthropic; const h=document.getElementById('anthropicLogo'); if(h) h.src=b.anthropic; }
+  if(b.um){ umImg.src=b.um; const h=document.getElementById('umLogo'); if(h) h.src=b.um; }
+}).catch(()=>{});
+// sponsor logos — inlined by the server from whatever is in assets/ (excludes brand/axie)
 let sponsorLogos = [];
 fetch('/api/logos').then(r=>r.json()).then(d=>{
-  sponsorLogos = (d.sponsors||[]).map(name => { const im=loadImg('assets/'+encodeURIComponent(name)); im._name=name; return im; });
+  sponsorLogos = (d.sponsors||[]).filter(s=>s&&s.data).map(s => { const im=loadImg(s.data); im._name=s.name; return im; });
 }).catch(()=>{});
-// header images
-const umHeader=document.getElementById('umLogo'); if(umHeader) umHeader.src=UM_LOGO;
-const anthHeader=document.getElementById('anthropicLogo'); if(anthHeader) anthHeader.src='assets/Anthropic.png';
-const axiometaHeader=document.getElementById('axiometaLogo'); if(axiometaHeader) axiometaHeader.src='assets/axiometa.jpg';
 
 // EXACT Axie — the same robot composited into every render.
 // Drop the exact Axie artwork at assets/axie.png. It's recoloured to white
